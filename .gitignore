@@ -1,4 +1,5 @@
 # Other
+.DS_Store
 source/prototype
 *.wav
 test_dummy.py
