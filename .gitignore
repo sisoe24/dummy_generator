@@ -1,5 +1,6 @@
 # Other
 .DS_Store
+source/Dummy_*
 source/prototype
 *.wav
 test_dummy.py
