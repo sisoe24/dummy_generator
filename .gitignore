@@ -1,7 +1,7 @@
 # Other
-source/.prototype/*
+source/prototype
 *.wav
-tests/
+test_dummy.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
