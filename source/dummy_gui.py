@@ -100,9 +100,10 @@ class DummyGui(tk.Tk):
             variable=self.invisible_var)
         invisbile_checkbox.grid(column=0, row=2, padx=5, pady=5, sticky=tk.W)
 
-        self.p_bar = ttk.Progressbar(sx_lower_frame, orient=tk.HORIZONTAL,
-                                     length=200, mode='indeterminate')
-        self.p_bar.grid(column=0, row=3, padx=10, pady=10)
+        # self.p_bar = ttk.Progressbar(sx_lower_frame, orient=tk.HORIZONTAL,
+        #                              length=200, mode='indeterminate')
+        # self.p_bar.grid(column=0, row=3, padx=10, pady=10)
+
         # LOWER FRAME RIGHT
         self.dx_lower_frame = ttk.Frame(lower_frame, width=320, height=145)
         self.dx_lower_frame.grid(column=3, row=0)
@@ -157,7 +158,7 @@ class DummyGui(tk.Tk):
         self.file_sample_button['state'] = self.file_sample_var.get()
 
     def generate_dummy(self):
-        self.p_bar.start()
+        # self.p_bar.start()
         d = DummyGenerator(main_path=self.directory,
                            sample_file='',
                            invisible_files=self.invisible_var.get())
@@ -166,9 +167,7 @@ class DummyGui(tk.Tk):
         else:
             d.make_dummy_directory()
         self.show_message()
-        # msg = messagebox.showinfo(
-        #     title='Loading', message='Done!')
-        self.p_bar.stop()
+        # self.p_bar.stop()
 
     def show_message(self):
         msg = messagebox.showinfo(
