@@ -14,7 +14,13 @@ class DummyGui(tk.Tk):
         super().__init__()
 
         self.title('Dummy Generator')
-        self.geometry('640x290-500+500')
+        app_x = 640
+        app_y = 290
+
+        # position window in middle of the screen
+        position_width = self.winfo_screenwidth() // 2 - (app_x // 2)
+        position_height = self.winfo_screenheight() // 2 - (app_y // 2)
+        self.geometry(f'{app_x}x{app_y}-{position_width}+{position_height}')
         self.resizable(width=False, height=False)
 
         self.grid_columnconfigure(1, weight=1)
@@ -171,6 +177,7 @@ class DummyGui(tk.Tk):
             subprocess.run(['open', '.'])
         elif platform.system() == 'Linux':
             subprocess.run(['xdg-open', '.'])
+
 
 if __name__ == '__main__':
     gui = DummyGui()
