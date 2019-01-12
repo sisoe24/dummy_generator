@@ -12,7 +12,7 @@ Dummy Generator, can also convert all the generated files into "real" ones from 
 
 ### Using Dummy Generator
 
-> All the examples from now on, are assuming that you are in the same directory where the dummy_generator.py is.
+> All the examples from now on, are assuming that your current directory is in the same directory where the dummy_generator.py is.
 > If not then you need to supply the full path of the script.
 > You always drag and drop folders or files inside the terminal for a quick path!
 > ![Alt Text](https://media.giphy.com/media/1BFWhNVg0ALAt4i8pB/giphy.gif)
@@ -22,13 +22,23 @@ Dummy Generator, can also convert all the generated files into "real" ones from 
 ### UPDATE:
 
 #### GUI:
-Dummy generator now can also be launched using the standard python GUI framework Tkinter.
-You need to have tkinter on your computer. If you are on MacOS, tkinter comes already in your python package while if you are on linux you probably need to install it manually.
+Dummy generator now can also be launched using the standard python GUI framework; Tkinter.
+In order for it to work you need to have tkinter on your computer. If you are on MacOS, tkinter comes already in your python package while if you are on linux you probably need to install it manually. You can check by typing into the terminal
+
+    python3 -m tkinter
+
+If you get the error no module named tkinter then you should do:
 
     sudo apt-get install python3-tk
 
-To launch the GUI version
-To start using the Dummy Generator, is as simple as launching the script inside the terminal and
+To launch the GUI version you just need to call the script from the terminal with python
+
+    python3 dummy_gui.py
+
+The gui should be pretty self explanatory on how to use it.
+
+-----
+To start using the Dummy Generator by command line, is as simple as launching the script inside the terminal and
 providing the path of the source directory you want to copy.
 
     $ python3 dummy_generator.py /users/etc/documents/Music
@@ -37,11 +47,18 @@ providing the path of the source directory you want to copy.
     $ ..
 
 This will copy and generate the dummy files inside the directory where `dummy_generator.py` is.
+> this should be arbitrarly so at some point you should be able to decide where to save it
 
-    Dummy\ Generator/
-    ├── Dummy\ Music  <- the dummy directory generated
-    ├── dummy_generator.py
-    └── sample.wav
+    Dummy_Generator/
+    ├── LICENSE
+    ├── README.md
+    ├── requirements.txt
+    ├── source
+    │   ├── __init__.py
+    │   ├── dummy_generator.py
+    │   ├── dummy_gui.py
+    │   └── Dummy_Music/  # <- the dummy directory generated
+    └── tests
 
 ---
 
@@ -50,9 +67,13 @@ This will copy and generate the dummy files inside the directory where `dummy_ge
 There are a few optional parameters that can add some extra options:
 
 > You can always bring them up with `-h` or `--help`
+> The progress bar works only if you have the tqdm module installed
+> but is not a total requirament, if you dont have it simply wont show anything
 
     -f FILE, --file FILE  Sample file to be used as base for generating
                           'real' dummy files.
+    -i, --invisibile      Include invisibile files. default is false
+    -p, --progress        Show progress bar
     -v, --verbosity       Increase output verbosity.
     -z, --zip             Archive the created dummy directory.
 
@@ -84,9 +105,14 @@ There are a few optional parameters that can add some extra options:
         make_zip        [INFO] - Creating zip archive...
         make_zip        [INFO] - Done.
         Done!
-        $ tree -L 1
+        $ tree
         .
-        ├── SEND_ME.zip <- the new archive generated from the dummy directory
-        ├── Dummy music/
-        ├── dummy_generator.py
-        └── sample.wav
+        ├── LICENSE
+        ├── README.md
+        ├── requirements.txt
+        ├── source
+        │   ├── __init__.py
+        │   ├── dummy_generator.py
+        │   ├── dummy_gui.py
+        │   └── SEND_ME.zip   #  <- the created zip file
+        └── tests
