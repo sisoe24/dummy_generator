@@ -4,10 +4,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pylint = "*"
+autopep8 = "*"
+py2app = "*"
+v = {editable = true,version = "*"}
 
 [packages]
 tqdm = "==4.29.0"
-py2app = "*"
 
 [requires]
 python_version = "3.7"
