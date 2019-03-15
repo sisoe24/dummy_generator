@@ -22,7 +22,7 @@ LOGGER.addHandler(PRINT_TERMINAL)
 PROGRESS_BAR = False
 
 
-class DummyGenerator(object):
+class DummyGenerator:
     """A Class that generates dummy files from a given path."""
 
     def __init__(self, main_path, sample_file, invisible_files):
@@ -86,7 +86,7 @@ class DummyGenerator(object):
         """
         LOGGER.info(
             f'Copying from Directory: {os.path.basename(self.main_path)}...')
-        for dirpath, dirnames, filenames in os.walk(self.main_path):
+        for dirpath, _, filenames in os.walk(self.main_path):
             for filename in filenames:
                 if not self.invisibile_files:
                     if not filename.startswith('.'):
@@ -127,6 +127,7 @@ if __name__ == '__main__':
             PROGRESS_BAR = True
         except ModuleNotFoundError:
             PROGRESS_BAR = False
+            LOGGER.warning('module tqdm not found')
     else:
         PROGRESS_BAR = False
 
