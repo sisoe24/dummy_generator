@@ -143,15 +143,15 @@ class DummyGui(tk.Tk):
         self.button_confirm['state'] = 'normal'
 
     def get_sample(self):
-        file_path = filedialog.askopenfilename()
-        self.filename = os.path.basename(file_path)
+        self.file_path = filedialog.askopenfilename(initialdir=".")
+        filename = os.path.basename(self.file_path)
         try:
             if self.selected_file:
                 self.selected_file.destroy()
         except AttributeError:
             pass
         self.selected_file = ttk.Label(
-            self.file_box, text=self.filename, wraplength=400)
+            self.file_box, text=filename, wraplength=400)
         self.selected_file.grid(column=6, row=2)
 
     def enable_combobox(self):
@@ -159,8 +159,14 @@ class DummyGui(tk.Tk):
 
     def generate_dummy(self):
         # self.p_bar.start()
+        if self.file_path:
+            sample_file = self.file_path
+            print(f'DEBUG---sample_file: {self.file_path}')
+        else:
+            sample_file = ''
+
         d = DummyGenerator(main_path=self.directory,
-                           sample_file='',
+                           sample_file=sample_file,
                            invisible_files=self.invisible_var.get())
         if self.zip_var.get():
             d.make_zip_dummy_directory()
