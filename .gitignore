@@ -3,6 +3,7 @@
 source/prototype
 .vscode/*
 other/*
+*.wav
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
