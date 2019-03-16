@@ -40,8 +40,9 @@ class DummyGenerator:
     def make_zip_dummy_directory(self):
         """Generate and create archive with Dummy directory."""
         LOGGER.info('Creating zip archive...')
-        output_filename = 'SEND_ME'
         directory_to_zip = self.make_dummy_directory()
+        output_filename = 'SEND_ME_' + os.path.basename(directory_to_zip)
+        LOGGER.warning(directory_to_zip)
         shutil.make_archive(output_filename, 'zip', directory_to_zip)
         shutil.rmtree(directory_to_zip)
 
@@ -71,9 +72,11 @@ class DummyGenerator:
             else:
                 with open(f'{tmp_name}/{files}', 'wb') as f:
                     f.write(bytearray(chunk_size))
-
+        home = os.path.expanduser('~')
+        dummy_home = f'{home}/Dummy_Folder'
+        os.makedirs(dummy_home, exist_ok=True)
         dummy_name = shutil.move(f'{tmp_name}/{self.main_path}',
-                                 f'Dummy_{top_folder}')
+                                f'{dummy_home}/Dummy_{top_folder}')
         shutil.rmtree(tmp_name)
         return dummy_name
 
