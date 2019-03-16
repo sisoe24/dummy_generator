@@ -1,5 +1,6 @@
 import os
 import platform
+import subprocess
 
 import tkinter as tk
 from tkinter import ttk
@@ -18,6 +19,16 @@ def calc_size(file):
     elif file_size < 1000:
         size = f'{file_size} bytes'
     return size
+
+
+def end_message():
+    """Show end msg and open directory."""
+    dummy_home = f'{os.path.expanduser("~")}/Dummy_Folder'
+    messagebox.showinfo(title='Complete', message='Done!')
+    if platform.system() == 'Darwin':
+        subprocess.run(['open', dummy_home])
+    elif platform.system() == 'Linux':
+        subprocess.run(['xdg-open', dummy_home])
 
 
 class MainCore(ttk.Frame):
@@ -55,9 +66,18 @@ class MainCore(ttk.Frame):
         invisbile_checkbox.grid(column=0, row=1, padx=5, pady=5, sticky=tk.NW)
 
         # ----- sample file -----
-        self.sample_file_btn = ttk.Button(self.options_label, command=self.set_sample,
-                                          text='Select sample file')
-        self.sample_file_btn.grid(column=1, row=0, padx=5, pady=5, sticky=tk.W)
+        sample_file_btn = ttk.Button(self.options_label, command=self.set_sample,
+                                     text='Select sample file')
+        sample_file_btn.grid(column=1, row=0, padx=5, pady=5, sticky=tk.W)
+
+        self.status = ttk.Label(self.options_label, text='Status:')
+        self.status.place(x=0, y=75)
+
+        self.status_var = tk.StringVar()
+        self.status_var.set('waitinig for user input...')
+        self.status = ttk.Label(
+            self.options_label, textvariable=self.status_var)
+        self.status.grid(column=0, row=2, sticky=tk.SW)
 
         self.treeview = ttk.Treeview(
             self.options_label, columns=('name', 'size'), height=3)
@@ -91,10 +111,6 @@ class MainCore(ttk.Frame):
         self.treeview.set('tree', 'size', calc_size(self.sample_file))
         return self.sample_file
 
-    def get_sample_name(self):
-        filename = os.path.basename(self.sample_file)
-        return filename
-
     @property
     def toggle_zip(self):
         """Compress folder after copy."""
@@ -108,12 +124,17 @@ class MainCore(ttk.Frame):
         return toggle_invisibile
 
     def generate_dummy(self):
+        """Main call for generating dummy folder."""
+        self.status_var.set('generating in progress...')
+        self.update()
         for dir_path in self.text_box.get('1.0', 'end').splitlines():
             if dir_path:
                 DummyGenerator(dir_path,
                                self.sample_file,
                                self.toggle_invisible,
                                self.toggle_zip)
+        self.status_var.set('finish')
+        end_message()
 
 
 class MainFrame(tk.Tk):
