@@ -1,6 +1,5 @@
 import os
 import platform
-import subprocess
 
 import tkinter as tk
 from tkinter import ttk
@@ -9,181 +8,131 @@ from tkinter import filedialog, messagebox
 from dummy_generator import DummyGenerator
 
 
-class DummyGui(tk.Tk):
-    def __init__(self):
-        super().__init__()
+def calc_size(file):
+    """Convert file size."""
+    file_size = os.stat(file).st_size
+    if file_size > 1_000_000:
+        size = f'{file_size // 1_000_000} mb'
+    elif file_size > 1000:
+        size = f'{file_size // 1000} kbytes'
+    elif file_size < 1000:
+        size = f'{file_size} bytes'
+    return size
 
+
+class MainCore(ttk.Frame):
+    directory = ''
+    sample_file = ''
+
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+        self.grid_propagate(False)
+
+        ttk.Button(self, text='Select directory',
+                   command=self.get_directory).place(x=300, y=115)
+
+        self.button_confirm = ttk.Button(self, text='Confirm and proceed',
+                                         command=self.generate_dummy,
+                                         state='disabled')
+        self.button_confirm.place(x=450, y=115)
+
+        self.text_box = tk.Text(self, width=60, height=5,
+                                font=('TkDefaultFont', 15))
+        self.text_box.place(x=15, y=10)
+
+        self.options_label = ttk.LabelFrame(self, text='Optional')
+        self.options_label.place(x=10, y=150)
+
+        self.zip_var = tk.BooleanVar()
+        zip_checkbox = ttk.Checkbutton(
+            self.options_label, text='Zip Dummy folder', variable=self.zip_var)
+        zip_checkbox.grid(column=0, row=0, padx=5, pady=5, sticky=tk.W)
+
+        self.invisible_var = tk.BooleanVar()
+        invisbile_checkbox = ttk.Checkbutton(
+            self.options_label, text='Include invisibile files',
+            variable=self.invisible_var)
+        invisbile_checkbox.grid(column=0, row=1, padx=5, pady=5, sticky=tk.NW)
+
+        # ----- sample file -----
+        self.sample_file_btn = ttk.Button(self.options_label, command=self.set_sample,
+                                          text='Select sample file')
+        self.sample_file_btn.grid(column=1, row=0, padx=5, pady=5, sticky=tk.W)
+
+        self.treeview = ttk.Treeview(
+            self.options_label, columns=('name', 'size'), height=3)
+        self.treeview.grid(column=1, row=1, rowspan=2,
+                           padx=5, pady=5, sticky=tk.W)
+        self.treeview['show'] = 'headings'
+
+        self.treeview.heading('name', text='Name')
+        self.treeview.column('name', width=320)
+
+        self.treeview.heading('size', text='Size')
+        self.treeview.column('size', width=100)
+
+    def set_directory(self):
+        """Set directory from button selection and insert in text box."""
+        self.directory = filedialog.askdirectory(
+            initialdir='/Users/virgilsisoe/.venvs/PodcastTool/other/linux all files')
+        self.text_box.insert(tk.INSERT, self.directory + '\n')
+        return self.directory
+
+    def get_directory(self):
+        """Get directory path name."""
+        self.directory = self.set_directory()
+        self.button_confirm['state'] = 'normal'
+        return self.directory
+
+    def set_sample(self):
+        self.sample_file = filedialog.askopenfilename()
+        self.treeview.insert('', 'end', 'tree',)
+        self.treeview.set('tree', 'name', os.path.basename(self.sample_file))
+        self.treeview.set('tree', 'size', calc_size(self.sample_file))
+        return self.sample_file
+
+    def get_sample_name(self):
+        filename = os.path.basename(self.sample_file)
+        return filename
+
+    @property
+    def toggle_zip(self):
+        """Compress folder after copy."""
+        zip_folder = self.zip_var.get()
+        return zip_folder
+
+    @property
+    def toggle_invisible(self):
+        """Include invisibile files in the copy."""
+        toggle_invisibile = self.invisible_var.get()
+        return toggle_invisibile
+
+    def generate_dummy(self):
+        for dir_path in self.text_box.get('1.0', 'end').splitlines():
+            if dir_path:
+                DummyGenerator(dir_path,
+                               self.sample_file,
+                               self.toggle_invisible,
+                               self.toggle_zip)
+
+
+class MainFrame(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.title('Dummy Generator')
         app_x = 640
-        app_y = 290
-
-        # position window in middle of the screen
+        app_y = 300
         position_width = self.winfo_screenwidth() // 2 - (app_x // 2)
         position_height = self.winfo_screenheight() // 2 - (app_y // 2)
         self.geometry(f'{app_x}x{app_y}-{position_width}+{position_height}')
         self.resizable(width=False, height=False)
 
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(1, weight=1)
+        MainCore(self, width=640, height=300).grid(column=0, row=0)
 
-        main_frame = ttk.Frame(self, borderwidth=5,
-                               relief='sunken', width=640, height=290)
-        main_frame.grid(column=0, row=0)
-        main_frame.grid_columnconfigure(1, weight=1)
-        main_frame.grid_rowconfigure(1, weight=1)
-        main_frame.grid_propagate(False)
-
-        line_break_top = ttk.Separator(main_frame, orient=tk.VERTICAL)
-        line_break_top.grid(column=0, row=0, rowspan=2,
-                            columnspan=2, sticky=(tk.W, tk.E))
-
-        #  --- TOP WIDGETS ----
-        upper_frame = ttk.Frame(main_frame, width=630, height=139)
-
-        upper_frame.grid(column=0, row=0)
-        upper_frame.grid_propagate(False)
-
-        sx_upper_frame = ttk.Frame(upper_frame, width=200, height=139)
-        sx_upper_frame.grid(column=1, row=0, sticky=tk.E)
-
-        button_directory = ttk.Button(sx_upper_frame, text='Select directory',
-                                      command=self.get_directory, width=18)
-        button_directory.grid(column=0, pady=10, padx=15)
-
-        self.button_confirm = ttk.Button(sx_upper_frame,
-                                         text='Confirm and proceed',
-                                         command=self.generate_dummy, width=18,
-                                         state='disabled')
-        self.button_confirm.grid(column=0, row=1, pady=25, sticky=tk.S)
-
-        self.dx_upper_frame = ttk.Frame(upper_frame, width=440, height=140,
-                                        borderwidth=2)
-        self.dx_upper_frame.grid(column=3, row=0, sticky=tk.E)
-        self.dx_upper_frame.grid_propagate(False)
-
-        directory_label = ttk.Label(
-            self.dx_upper_frame, text='Selected Directory:')
-        directory_label.grid(column=1, row=0, padx=5, pady=5, sticky=tk.W)
-
-        self.text_box = tk.Frame(self.dx_upper_frame,
-                                 relief='sunken', width=400, height=100,
-                                 background='white', borderwidth=2)
-        self.text_box.grid(column=1, row=1)
-        self.text_box.grid_propagate(False)
-
-        # ---- LOWER WIDGETS ----
-        lower_frame = ttk.Frame(main_frame, width=630, height=135)
-        lower_frame.grid(column=0, row=1)
-        lower_frame.grid_propagate(False)
-
-        # LOWER FRAME LEFT
-        sx_lower_frame = ttk.Frame(lower_frame, width=310, height=145)
-        sx_lower_frame.grid(column=0, row=0)
-        sx_lower_frame.grid_propagate(False)
-
-        line_break_middle = ttk.Separator(main_frame, orient=tk.HORIZONTAL)
-        line_break_middle.grid(
-            column=0, row=1, columnspan=2, sticky=(tk.N, tk.S))
-
-        option_label = ttk.Label(sx_lower_frame, text='Options',
-                                 font=('TkDefaultFont', 20))
-        option_label.grid(column=0, row=0, pady=5, sticky=tk.N)
-
-        self.zip_var = tk.BooleanVar()
-        zip_checkbox = ttk.Checkbutton(
-            sx_lower_frame, text='Zip Dummy folder', variable=self.zip_var)
-        zip_checkbox.grid(column=0, row=1, padx=5, pady=5, sticky=tk.W)
-
-        self.invisible_var = tk.BooleanVar()
-        invisbile_checkbox = ttk.Checkbutton(
-            sx_lower_frame, text='Include invisibile files',
-            variable=self.invisible_var)
-        invisbile_checkbox.grid(column=0, row=2, padx=5, pady=5, sticky=tk.W)
-
-        # self.p_bar = ttk.Progressbar(sx_lower_frame, orient=tk.HORIZONTAL,
-        #                              length=200, mode='indeterminate')
-        # self.p_bar.grid(column=0, row=3, padx=10, pady=10)
-
-        # LOWER FRAME RIGHT
-        self.dx_lower_frame = ttk.Frame(lower_frame, width=320, height=145)
-        self.dx_lower_frame.grid(column=3, row=0)
-        self.dx_lower_frame.grid_propagate(False)
-
-        self.file_sample_var = tk.StringVar()
-        self.file_sample_checkbox = ttk.Checkbutton(
-            self.dx_lower_frame, text='Select sample file',
-            onvalue='readonly', offvalue='disabled',
-            variable=self.file_sample_var, command=self.enable_combobox)
-        self.file_sample_checkbox.grid(
-            column=6, row=0, padx=30, pady=10, sticky=tk.W)
-
-        self.file_sample_button = ttk.Button(
-            self.dx_lower_frame, width=28,
-            command=self.get_sample, text='Select sample file',
-            state='disabled')
-        self.file_sample_button.grid(
-            column=6, row=1, padx=30, pady=5, sticky=tk.E)
-
-        self.file_box = tk.Frame(
-            self.dx_lower_frame, background='white', borderwidth=2,
-            relief='sunken', width=280, height=50)
-        self.file_box.grid(column=6, row=4)
-        self.file_box.grid_propagate(False)
-
-    def get_directory(self):
-        self.directory = filedialog.askdirectory()
-        try:
-            if self.selected_dir:
-                self.selected_dir.destroy()
-        except AttributeError:
-            pass
-        self.selected_dir = ttk.Label(self.text_box, text=self.directory,
-                                      wraplength=400)
-        self.selected_dir.grid(column=1, row=2, padx=5, pady=5, sticky=tk.W)
-        self.button_confirm['state'] = 'normal'
-
-    def get_sample(self):
-        self.file_path = filedialog.askopenfilename(initialdir=".")
-        filename = os.path.basename(self.file_path)
-        try:
-            if self.selected_file:
-                self.selected_file.destroy()
-        except AttributeError:
-            pass
-        self.selected_file = ttk.Label(
-            self.file_box, text=filename, wraplength=400)
-        self.selected_file.grid(column=6, row=2)
-
-    def enable_combobox(self):
-        self.file_sample_button['state'] = self.file_sample_var.get()
-
-    def generate_dummy(self):
-        # self.p_bar.start()
-        if self.file_path:
-            sample_file = self.file_path
-            print(f'DEBUG---sample_file: {self.file_path}')
-        else:
-            sample_file = ''
-
-        d = DummyGenerator(main_path=self.directory,
-                           sample_file=sample_file,
-                           invisible_files=self.invisible_var.get())
-        if self.zip_var.get():
-            d.make_zip_dummy_directory()
-        else:
-            d.make_dummy_directory()
-        self.show_message()
-        # self.p_bar.stop()
-
-    def show_message(self):
-        msg = messagebox.showinfo(
-            title='Loading', message='Done!')
-        if platform.system() == 'Darwin':
-            subprocess.run(['open', '.'])
-        elif platform.system() == 'Linux':
-            subprocess.run(['xdg-open', '.'])
+        ttk.Separator(self, orient='horizontal').place(x=0, y=145, relwidth=1)
+        # ttk.Separator(self, orient='vertical').place(x=185, y=145, relheight=1)
 
 
 if __name__ == '__main__':
-    gui = DummyGui()
-    gui.mainloop()
+    GUI = MainFrame()
+    GUI.mainloop()
