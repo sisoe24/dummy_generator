@@ -1,9 +1,8 @@
 # Other
 .DS_Store
-source/prototype
+src/prototype
 .vscode/*
-other/*
-*.wav
+other/*.afphoto
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
