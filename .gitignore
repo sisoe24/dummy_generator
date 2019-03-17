@@ -3,7 +3,7 @@
 src/prototype
 .vscode/*
 other/*.afphoto
-
+other/*.wav
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
