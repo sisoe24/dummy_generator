@@ -3,7 +3,6 @@
 ## Description
 
 _Dummy Generator_ will copy a _directory tree_ of given path and generate a new version with dummy files.
-~~Dummy files are generate using the **bash command line**: `mkfile 1 filename`.~~
 
 A _dummy file_ has no attributes, meaning that it won't work with some applications or with specific tasks/workflow. When I first wrote this script I needed all files to be wav because of a special metadata working only with audio files, so if needed,
 Dummy Generator, can also convert all the generated files into "real" ones from a given sample file.
